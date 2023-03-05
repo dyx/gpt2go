@@ -9,7 +9,6 @@ export function getMessageList(): MessageModel[] {
   return obj ? JSON.parse(obj) : []
 }
 export function deleteMessage(id: string) {
-  debugger
   const messageList = getMessageList()
   const index = messageList.findIndex(item => item.id === id)
   if (index >= 0) {

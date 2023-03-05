@@ -21,6 +21,7 @@ const tokenRef = ref(0)
 const formModelRef = ref({
   lastName: '',
   firstNameLength: 2,
+  mode: 0.6,
   gender: '男',
   corpusScope: []
 })
@@ -40,21 +41,18 @@ const handleGenerateClick = () => {
   formRef.value?.validate((valid: boolean) => {
     if (valid) {
       let content = '假设你是一个取名大师，现在请你帮忙取名字。'
-      let corpusScope = ''
       const formModel = formModelRef.value
-      if (formModel.corpusScope && formModel.corpusScope.length > 0) {
-        corpusScope = `资料范围在[${formModel.corpusScope}]范围内，`
-      }
-      content += `必须满足的条件如下：姓${formModel.lastName}，姓名总字数为${
-        formModel.lastName.length + formModel.firstNameLength
-      }个，性别${formModel.gender}，${corpusScope}生成5个名字。`
-      content += '另外名字最好书写容易拼写和发音，与性别相符，有积极的含义，容易记忆，尽量不要与名人重名。'
+      const corpusScope = `${formModel.firstNameLength}个字必须从${
+        formModel.corpusScope && formModel.corpusScope.length > 0 ? formModel.corpusScope : '古籍'
+      }中查找，并返回这${formModel.firstNameLength}个字所在段落。`
+      content += `必须满足的条件如下：性别${formModel.gender}，${corpusScope}一共生成3个名字。`
+      content += '另外名字最好书写容易，与性别相符，有积极的含义，尽量不要与历史名人重名。'
       content += `输出形式只有JSON数组，格式[{"name": "", "source": "", "relevantWord": "", "meaning": ""}]，格式解释：[name为姓名] [source为出处] [relevantWord为相关字所在段落] [meaning为寓意]`
       requestingRef.value = true
       send({
         model: GptModel.GPT_35_TURBO,
         messages: [{ role: ChatCompletionRequestMessageRoleEnum.System, content }],
-        temperature: 0.6
+        temperature: formModel.mode
       })
         .then(res => {
           try {
@@ -101,6 +99,13 @@ const handleGenerateClick = () => {
               <el-radio-button label="女">女</el-radio-button>
             </el-radio-group>
           </el-form-item>
+          <!--          <el-form-item label="模式" prop="mode">-->
+          <!--            <el-radio-group v-model="formModelRef.mode">-->
+          <!--              <el-radio-button :label="0.6">精确</el-radio-button>-->
+          <!--              <el-radio-button :label="1">平衡</el-radio-button>-->
+          <!--              <el-radio-button :label="1.2">有创造力</el-radio-button>-->
+          <!--            </el-radio-group>-->
+          <!--          </el-form-item>-->
           <el-form-item label="参考书籍" v-model="formModelRef.corpusScope">
             <el-select multiple v-model="formModelRef.corpusScope" style="width: 100%">
               <el-option v-for="(item, index) in NAME_CORPUS_SCOPE" :key="index" :label="item" :value="item" />
@@ -114,8 +119,8 @@ const handleGenerateClick = () => {
                 size="large"
                 type="info"
                 style="position: absolute; right: 0; margin-left: 8px"
-              ><el-icon size="14"><Coin /></el-icon
-              ><span style="position: relative; top: -2px; left: 4px">{{ tokenRef }}</span></el-tag
+                ><el-icon size="14"><Coin /></el-icon
+                ><span style="position: relative; top: -2px; left: 4px">{{ tokenRef }}</span></el-tag
               >
             </el-tooltip>
           </el-form-item>
@@ -216,7 +221,7 @@ const handleGenerateClick = () => {
             </el-row>
             <el-row style="margin-top: 16px">
               <el-col>
-                <span class="result-label">出处</span>
+                <span class="result-label">参考</span>
                 <span class="result-value" style="font-size: 18px">{{ item.source + '' + item.relevantWord }}</span>
               </el-col>
             </el-row>

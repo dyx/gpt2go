@@ -92,7 +92,6 @@ export function send(request: CreateChatCompletionRequest): Promise<CreateChatCo
       .createChatCompletion(request, { timeout: 90 * 1000 })
       .then(res => resolve(res.data))
       .catch(err => {
-        debugger
         let errMsg = ''
         if (err) {
           if (err.response) {
