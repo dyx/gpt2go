@@ -7,7 +7,7 @@ export interface MenuItemModel {
 }
 
 export interface MessageModel {
-  id: string
+  id?: string
   created?: number
   model?: string
   role: string
@@ -17,6 +17,7 @@ export interface MessageModel {
 }
 
 export interface ChatSettingModel {
+  model: string
   isIncludeContext: boolean
   temperature: number
 }
@@ -24,4 +25,9 @@ export interface ChatSettingModel {
 export interface ChatExportModel {
   filename?: string
   fileFormat?: string
+}
+
+export interface HomepageNavCardItemModel {
+  label: string
+  link: string
 }

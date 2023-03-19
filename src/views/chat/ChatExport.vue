@@ -1,12 +1,14 @@
 <script setup lang="ts">
-import {computed, ref, watch} from 'vue'
+import { computed, ref, watch } from 'vue'
 import { Close, Download } from '@element-plus/icons-vue'
 import { ChatExportModel } from '@/model/commonModel'
 import { getMessageList } from '@/store'
 import { ChatCompletionRequestMessageRoleEnum } from 'openai/api'
 import { FormRules } from 'element-plus'
+import html2canvas from 'html2canvas'
+import { downloadFile } from '@/utils/commonUtil'
 
-const props = defineProps<{ modelValue?: boolean }>()
+const props = defineProps<{ modelValue?: boolean; exportElement: any }>()
 const emit = defineEmits(['update:modelValue'])
 const visibleRef = computed({
   get: () => props.modelValue,
@@ -35,30 +37,54 @@ const handleCloseClick = () => {
 const handleExportClick = () => {
   formRef.value?.validate((valid: boolean) => {
     if (valid) {
-      loadingRef.value = true
-      let markdownContent = ''
-      for (const messageModel of getMessageList()) {
-        if (messageModel.role === ChatCompletionRequestMessageRoleEnum.User) {
-          markdownContent += '> ' + messageModel.content + '\n\n'
-        } else {
-          markdownContent += messageModel.content + '\n\n'
-        }
+      if (formModelRef.value.fileFormat === '.md') {
+        exportMarkdown()
+      } else if (formModelRef.value.fileFormat === '.png') {
+        exportImage()
       }
-      let link = document.createElement('a')
-      link.href = window.URL.createObjectURL(new Blob([markdownContent]))
-      link.download = decodeURI((formModelRef.value.filename as string) + (formModelRef.value.fileFormat as string))
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
-      visibleRef.value = false
-      loadingRef.value = false
     }
   })
+}
+const exportMarkdown = () => {
+  loadingRef.value = true
+  let markdownContent = ''
+  for (const messageModel of getMessageList()) {
+    if (messageModel.role === ChatCompletionRequestMessageRoleEnum.User) {
+      markdownContent += '> ' + messageModel.content + '\n\n'
+    } else {
+      markdownContent += messageModel.content + '\n\n'
+    }
+  }
+  downloadFile(
+    window.URL.createObjectURL(new Blob([markdownContent])),
+    (formModelRef.value.filename as string) + (formModelRef.value.fileFormat as string)
+  )
+  visibleRef.value = false
+  loadingRef.value = false
+}
+const exportImage = () => {
+  loadingRef.value = true
+  html2canvas(props.exportElement, {
+    scale: 2,
+    allowTaint: false,
+    useCORS: true,
+    backgroundColor: '#000000'
+  })
+    .then(canvas => {
+      downloadFile(
+        canvas.toDataURL('image/png'),
+        (formModelRef.value.filename as string) + (formModelRef.value.fileFormat as string)
+      )
+    })
+    .finally(() => {
+      visibleRef.value = false
+      loadingRef.value = false
+    })
 }
 
 watch(
   () => visibleRef.value,
-  (visible) => {
+  visible => {
     if (visible) {
       formModelRef.value.filename = `gpt2go-session-${new Date().getTime()}`
       formModelRef.value.fileFormat = '.md'
@@ -83,7 +109,14 @@ watch(
         </div>
         <div class="right-panel">
           <el-tooltip content="导出文件" :show-after="1500">
-            <el-button :loading="loadingRef" type="primary" @click="handleExportClick" size="small" :icon="Download" circle></el-button>
+            <el-button
+              :loading="loadingRef"
+              type="primary"
+              @click="handleExportClick"
+              size="small"
+              :icon="Download"
+              circle
+            ></el-button>
           </el-tooltip>
           <el-tooltip content="关闭窗口" :show-after="1500">
             <el-button type="primary" @click="handleCloseClick" size="small" :icon="Close" circle></el-button>
@@ -97,6 +130,7 @@ watch(
             <template #prepend>
               <el-select v-model="formModelRef.fileFormat" placeholder="Select" style="width: 120px">
                 <el-option label="Markdown" value=".md" />
+                <el-option label="图片" value=".png" />
               </el-select>
             </template>
             <template #append>

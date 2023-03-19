@@ -36,7 +36,6 @@ menuDataRef.value = getMenus()
   --el-menu-hover-bg-color: rgb(42, 43, 50);
   --el-menu-text-color: #ffffff;
   --el-menu-active-color: #ffffff;
-  --aside-width: 200px;
   --menu-bg-color: rgb(32, 33, 35);
   --menu-active-bg-color: rgb(52, 53, 65);
 }

@@ -1,4 +1,10 @@
-import { STORAGE_KEY_API_KEY, STORAGE_KEY_CHAT_MESSAGE_LIST, STORAGE_KEY_CHAT_SETTING } from '@/model/commonConstant'
+import {
+  STORAGE_KEY_API_KEY,
+  STORAGE_KEY_CHAT_MESSAGE_LIST,
+  STORAGE_KEY_CHAT_SETTING,
+  STORAGE_KEY_GUESS_THING_ANSWER,
+  STORAGE_KEY_GUESS_THING_MESSAGE_LIST
+} from '@/model/commonConstant'
 import { ChatSettingModel, MessageModel } from '@/model/commonModel'
 
 export function setMessageList(messageList: MessageModel[]) {
@@ -15,6 +21,21 @@ export function deleteMessage(id: string) {
     messageList.splice(index, 2)
     setMessageList(messageList)
   }
+}
+
+export function setGuessThingAnswer(answer: string) {
+  localStorage.setItem(STORAGE_KEY_GUESS_THING_ANSWER, answer)
+}
+export function getGuessThingAnswer(): string {
+  const obj = localStorage.getItem(STORAGE_KEY_GUESS_THING_ANSWER)
+  return obj ? obj : ''
+}
+export function setGuessThingMessageList(messageList: MessageModel[]) {
+  localStorage.setItem(STORAGE_KEY_GUESS_THING_MESSAGE_LIST, JSON.stringify(messageList))
+}
+export function getGuessThingMessageList(): MessageModel[] {
+  const obj = localStorage.getItem(STORAGE_KEY_GUESS_THING_MESSAGE_LIST)
+  return obj ? JSON.parse(obj) : []
 }
 
 export function setApiKey(apiKey: string) {

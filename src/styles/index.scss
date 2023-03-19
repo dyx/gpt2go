@@ -1,8 +1,142 @@
 body,div,dl,dt,dd,ul,ol,li,tr,td,th,
 h1,h2,h3,h4,h5,h6,hr,br,img,table,
-input,form,a,p,textarea{
+input,form,a,p,pre,textarea{
   padding:0;
   margin:0;
+}
+
+:root {
+  --aside-width: 200px;
+}
+
+.card-header {
+  .indicator {
+    height: 16px;
+    width: 8px;
+    background-color: var(--el-color-primary);
+    margin-right: 4px;
+    position: relative;
+    top: 1px;
+    display: inline-block;
+  }
+  .title {
+    font-size: 18px;
+  }
+}
+
+.marked-panel {
+  color: rgb(55,65,81);
+  line-height: 24px;
+  ol:last-child {
+    margin-bottom: 0;
+  }
+  ol:first-child {
+    margin-top: 0;
+  }
+  ul:last-child {
+    margin-bottom: 0;
+  }
+  ul:first-child {
+    margin-top: 0;
+  }
+  ol,ul {
+    margin: 16px 0;
+    display: flex;
+    flex-direction: column;
+    padding-left: 20px;
+    li:last-child {
+      margin-bottom: 0;
+    }
+    li {
+      margin-bottom: 8px;
+    }
+    li::marker {
+      color: rgb(107, 114, 128);
+      font-weight: 400;
+      text-align: right;
+    }
+  }
+  p:last-child {
+    margin-bottom: 0;
+  }
+  p:first-child {
+    margin-top: 0;
+  }
+  p {
+    margin: 16px 0;
+  }
+  pre {
+    .button-panel {
+      position: absolute;
+      top: 0;
+      right: 0;
+      margin: 4px;
+      cursor: pointer;
+      text-align: center;
+      font-size: 10px;
+      color: var(--el-color-white);
+      user-select: none;
+      width: 60px;
+      .copy-button {
+        border-radius: 4px;
+        z-index: 1;
+        background-color: var(--el-text-color-primary);
+      }
+      .copied-button {
+        position: absolute;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        right: 0;
+        border-radius: 4px;
+        z-index: 2;
+        background-color: var(--el-text-color-primary);
+      }
+    }
+    code {
+      border-radius: 6px;
+    }
+  }
+  table {
+    border-collapse: separate;
+    border-spacing: 0;
+    width: 100%;
+    font-size: 14px;
+    line-height: 24px;
+    margin-bottom: 16px;
+    margin-top: 16px;
+    table-layout: auto;
+    text-align: left;
+    border-radius: 6px;
+    border: 1px solid rgb(217, 217, 217);
+    th:last-child {
+      border-right: 0;
+    }
+    th {
+      background-color: rgba(236,236,241,.2);
+      border-right: 1px solid rgb(217, 217, 217);
+      border-bottom: 1px solid rgb(217, 217, 217);
+      padding: 4px 8px;
+      color: rgb(17 24 39);
+      font-weight: 600;
+    }
+    tbody {
+      tr:last-child td {
+        border-bottom: 0;
+      }
+      tr {
+        td:last-child {
+          border-right: 0;
+        }
+        td {
+          border-bottom: 1px solid rgb(217, 217, 217);
+          border-right: 1px solid rgb(217, 217, 217);
+          padding: 4px 8px;
+          vertical-align: baseline;
+        }
+      }
+    }
+  }
 }
 
 

@@ -5,13 +5,13 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { send } from '@/api'
 import { marked } from 'marked'
 import { Download, Delete, Setting } from '@element-plus/icons-vue'
-import hljs from 'highlight.js'
 import { deleteMessage, getChatSetting, getMessageList, setMessageList } from '@/store'
 import { MessageModel } from '@/model/commonModel'
 import CountUp from 'vue-countup-v3'
 import ChatSetting from '@/views/chat/ChatSetting.vue'
-import { GptModel } from '@/model/commonConstant'
 import ChatExport from '@/views/chat/ChatExport.vue'
+import ChatShare from '@/views/chat/ChatShare.vue'
+import ChatContent from '@/views/chat/components/ChatContent.vue'
 
 const messageBoxRef = ref()
 const messageListScrollBarRef = ref()
@@ -21,8 +21,10 @@ const promptRef = ref('')
 const totalTokenRef = ref(0)
 const currentTokenRef = ref(0)
 const requestingRef = ref(false)
+const currentShareMessageModelListRef = ref([] as MessageModel[])
 const chatSettingVisible = ref(false)
 const chatExportVisible = ref(false)
+const chatShareVisible = ref(false)
 
 const init = () => {
   messageModelListRef.value = getMessageList()
@@ -41,6 +43,9 @@ const setToken = (messages: MessageModel[]) => {
   }
   totalTokenRef.value = totalToken
   currentTokenRef.value = currentToken
+}
+const appendPromptIdSuffix = (id: string) => {
+  return `${id}-prompt`
 }
 const handleSendMessageClick = () => {
   if (requestingRef.value) {
@@ -65,14 +70,13 @@ const handleSendMessageClick = () => {
   requestingRef.value = true
 
   send({
-    model: GptModel.GPT_35_TURBO,
+    model: chatSettingModel.model,
     messages,
     temperature: chatSettingModel.temperature
   })
     .then(res => {
-      console.log(res)
       messageModelListRef.value.push({
-        id: res.id + '-prompt',
+        id: appendPromptIdSuffix(res.id),
         created: res.created,
         model: res.model,
         role: ChatCompletionRequestMessageRoleEnum.User,
@@ -102,9 +106,11 @@ const handleSendMessageClick = () => {
     })
     .finally(() => (requestingRef.value = false))
 }
-const handleMessageDeleteClick = (id: string) => {
-  deleteMessage(id)
-  init()
+const handleMessageDeleteClick = (id: string | undefined) => {
+  if (id) {
+    deleteMessage(id)
+    init()
+  }
 }
 const handleMessageCopyClick = (content: string) => {
   if (content) {
@@ -115,6 +121,18 @@ const handleMessageCopyClick = (content: string) => {
       type: 'info'
     })
   }
+}
+const handleMessageShareClick = (id: string) => {
+  const list = []
+  for (let i = 0; i < messageModelListRef.value.length; i++) {
+    const item = messageModelListRef.value[i]
+    if (item.id === id) {
+      list.push(item)
+      list.push(messageModelListRef.value[i + 1])
+    }
+  }
+  currentShareMessageModelListRef.value = list
+  chatShareVisible.value = true
 }
 const handleClearSessionClick = () => {
   ElMessageBox.confirm('确定要清空会话吗？').then(() => {
@@ -144,60 +162,41 @@ init()
     <div class="message-list-panel">
       <el-scrollbar ref="messageListScrollBarRef">
         <div style="position: fixed; right: 0; margin: 8px">
-          <el-tooltip content="清空会话" :show-after="1500">
-            <el-button
-              type="primary"
-              style="position: relative"
-              size="small"
-              :icon="Delete"
-              circle
-              @click="handleClearSessionClick"
-            />
-          </el-tooltip>
-          <el-tooltip content="导出会话" :show-after="1500">
-            <el-button
-              type="primary"
-              style="position: relative"
-              size="small"
-              :icon="Download"
-              circle
-              @click="chatExportVisible = true"
-            />
-          </el-tooltip>
-          <el-tooltip content="设置" :show-after="1500">
-            <el-button
-              type="primary"
-              style="position: relative"
-              size="small"
-              :icon="Setting"
-              circle
-              @click="chatSettingVisible = true"
-            />
-          </el-tooltip>
+          <el-button
+            type="primary"
+            style="position: relative"
+            size="small"
+            :icon="Delete"
+            circle
+            @click="handleClearSessionClick"
+          />
+          <el-button
+            type="primary"
+            style="position: relative"
+            size="small"
+            :icon="Download"
+            circle
+            @click="chatExportVisible = true"
+          />
+          <el-button
+            type="primary"
+            style="position: relative"
+            size="small"
+            :icon="Setting"
+            circle
+            @click="chatSettingVisible = true"
+          />
         </div>
         <div ref="messageListRef">
-          <div
-            v-for="item in messageModelListRef"
-            :key="item.id"
-            class="message-item"
-            :style="{
-              backgroundColor:
-                item.role === ChatCompletionRequestMessageRoleEnum.Assistant ? 'rgb(247,247,248)' : 'rgb(255,255,255)'
-            }"
-          >
-            <div class="message-item-avatar-panel">
-              <div class="message-item-avatar">
-                <el-icon
-                  v-if="item.role === ChatCompletionRequestMessageRoleEnum.Assistant"
-                  size="16"
-                  class="message-item-avatar-icon"
-                  ><Monitor
-                /></el-icon>
-                <el-icon v-else size="16" class="message-item-avatar-icon"><User /></el-icon>
-              </div>
-            </div>
-            <div class="message-item-content" v-highlight v-html="marked.parse(item.content)"></div>
-            <div class="message-item-button-panel">
+          <ChatContent show-operate-area :message-model-list="messageModelListRef">
+            <template #operateArea="{ item }">
+              <el-icon
+                v-if="item.role === ChatCompletionRequestMessageRoleEnum.User"
+                size="16px"
+                class="message-item-button"
+                @click="handleMessageShareClick(item.id)"
+                ><Share
+              /></el-icon>
               <el-popconfirm
                 v-if="item.role === ChatCompletionRequestMessageRoleEnum.User"
                 width="200px"
@@ -205,25 +204,18 @@ init()
                 @confirm="handleMessageDeleteClick(item.id)"
               >
                 <template #reference>
-                  <div>
-                    <el-tooltip content="删除对话" :show-after="1500">
-                      <el-icon size="16px" class="message-item-button"><Delete /></el-icon>
-                    </el-tooltip>
-                  </div>
+                  <el-icon size="16px" class="message-item-button"><Delete /></el-icon>
                 </template>
               </el-popconfirm>
-              <el-tooltip
+              <el-icon
                 v-if="item.role === ChatCompletionRequestMessageRoleEnum.Assistant"
-                content="复制对话"
-                :show-after="1500"
-              >
-                <el-icon size="16px" class="message-item-button" @click="handleMessageCopyClick(item.content)"
-                  ><CopyDocument
-                /></el-icon>
-              </el-tooltip>
-            </div>
-            <div style="clear: both"></div>
-          </div>
+                size="16px"
+                class="message-item-button"
+                @click="handleMessageCopyClick(item.content)"
+                ><CopyDocument
+              /></el-icon>
+            </template>
+          </ChatContent>
         </div>
       </el-scrollbar>
     </div>
@@ -268,11 +260,12 @@ init()
       </div>
     </div>
     <ChatSetting v-model="chatSettingVisible"></ChatSetting>
-    <ChatExport v-model="chatExportVisible"></ChatExport>
+    <ChatExport v-model="chatExportVisible" :export-element="messageListRef"></ChatExport>
+    <ChatShare v-model="chatShareVisible" :message-model-list="currentShareMessageModelListRef"></ChatShare>
   </div>
 </template>
 
-<style scoped>
+<style scoped lang="scss">
 :deep(.el-textarea__inner) {
   box-shadow: none;
   border-radius: 8px;
@@ -313,92 +306,60 @@ init()
   --message-box-panel-height: 136px;
   --message-box-padding: 20%;
   --message-item-avatar-width: 24px;
-  --message-item-button-panel-width: 60px;
-}
-.message-list-panel {
-  height: calc(100vh - var(--message-box-panel-height));
-}
-.message-item {
-  padding: 24px var(--message-box-padding);
-  border-bottom: 1px solid #d9d9e3;
-}
-.message-item-avatar-panel {
-  position: relative;
-}
-.message-item-avatar {
-  width: var(--message-item-avatar-width);
-  height: var(--message-item-avatar-width);
-  background-color: var(--el-color-primary);
-  color: var(--el-color-white);
-  border-radius: 2px;
-  float: left;
-  margin-right: 16px;
-}
-.message-item-avatar-icon {
-  position: relative;
-  top: 3px;
-  left: 4px;
-}
-.message-item-content {
-  float: left;
-  width: calc(100% - var(--message-item-avatar-width) - 16px - var(--message-item-button-panel-width));
-}
-.message-item-content ol li::marker {
-  text-indent: 16px;
-}
-.message-item-button-panel {
-  width: var(--message-item-button-panel-width);
-  float: left;
-  text-align: right;
-}
-.message-item-button {
-  padding: 4px;
-  cursor: pointer;
-}
-.message-item-button:hover {
-  background-color: rgb(236, 236, 241);
-  border-radius: 4px;
-}
-.message-box-panel {
-  position: relative;
-  height: var(--message-box-panel-height);
-  padding: 0 var(--message-box-padding);
-}
-.message-box-info {
-  position: absolute;
-  bottom: 98px;
-}
-.message-box {
-  width: calc(100% - var(--message-box-padding) * 2);
-  position: absolute;
-  bottom: 40px;
-  box-shadow: 0 0 transparent, 0 0 transparent, 0 0 10px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  border-radius: 8px;
-  overflow: hidden;
-}
-.message-box-button {
-  position: absolute;
-  padding: 4px;
-  right: calc(var(--message-box-padding) + 12px);
-  bottom: 60px;
-  cursor: pointer;
-  color: rgb(142, 142, 160);
-}
-.message-box-button:hover {
-  background-color: rgb(236, 236, 241);
-  border-radius: 4px;
-}
-.message-box-tip {
-  width: calc(100% - var(--message-box-padding) * 2);
-  position: absolute;
-  bottom: 16px;
-  font-size: 12px;
-  color: rgba(0, 0, 0, 0.5);
-  text-align: center;
-}
-.message-box-loading {
-  animation: loading-spin 2s linear infinite;
+  --message-item-button-panel-width: 48px;
+  .message-list-panel {
+    height: calc(100vh - var(--message-box-panel-height));
+  }
+  .message-item-button {
+    float: right;
+    padding: 4px;
+    cursor: pointer;
+  }
+  .message-item-button:hover {
+    background-color: rgb(236, 236, 241);
+    border-radius: 4px;
+  }
+  .message-box-panel {
+    position: relative;
+    height: var(--message-box-panel-height);
+    padding: 0 var(--message-box-padding);
+  }
+  .message-box-info {
+    position: absolute;
+    bottom: 98px;
+  }
+  .message-box {
+    width: calc(100% - var(--message-box-padding) * 2);
+    position: absolute;
+    bottom: 40px;
+    box-shadow: 0 0 transparent, 0 0 transparent, 0 0 10px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .message-box-button {
+    position: absolute;
+    padding: 4px;
+    right: calc(var(--message-box-padding) + 12px);
+    bottom: 60px;
+    cursor: pointer;
+    color: rgb(142, 142, 160);
+  }
+  .message-box-button:hover {
+    background-color: rgb(236, 236, 241);
+    border-radius: 4px;
+  }
+  .message-box-tip {
+    width: calc(100% - var(--message-box-padding) * 2);
+    position: absolute;
+    bottom: 16px;
+    font-size: 12px;
+    color: rgba(0, 0, 0, 0.5);
+    text-align: center;
+  }
+  .message-box-loading {
+    animation: loading-spin 2s linear infinite;
+  }
 }
 @keyframes loading-spin {
   0% {

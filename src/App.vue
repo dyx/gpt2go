@@ -3,7 +3,7 @@ import { getChatSetting, setChatSetting } from '@/store'
 
 const chatSettingModel = getChatSetting()
 if (!chatSettingModel) {
-  setChatSetting({ isIncludeContext: false, temperature: 1 })
+  setChatSetting({ isIncludeContext: false, temperature: 1, model: 'gpt-3.5-turbo' })
 }
 </script>
 

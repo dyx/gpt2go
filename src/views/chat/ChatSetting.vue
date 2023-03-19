@@ -24,6 +24,7 @@ const loadingRef = ref(false)
 const handleSaveClick = () => {
   loadingRef.value = true
   setChatSetting({
+    model: formModelRef.value.model,
     isIncludeContext: formModelRef.value.isIncludeContext,
     temperature: formModelRef.value.temperature
   })
@@ -52,7 +53,14 @@ const handleCloseClick = () => {
         </div>
         <div class="right-panel">
           <el-tooltip content="保存参数" :show-after="1500">
-            <el-button :loading="loadingRef" type="primary" @click="handleSaveClick" size="small" :icon="Check" circle></el-button>
+            <el-button
+              :loading="loadingRef"
+              type="primary"
+              @click="handleSaveClick"
+              size="small"
+              :icon="Check"
+              circle
+            ></el-button>
           </el-tooltip>
           <el-tooltip content="关闭窗口" :show-after="1500">
             <el-button type="primary" @click="handleCloseClick" size="small" :icon="Close" circle></el-button>
@@ -61,16 +69,40 @@ const handleCloseClick = () => {
         <div style="clear: both"></div>
       </div>
       <el-form ref="formRef" class="chat-setting-form" :model="formModelRef" label-width="140px">
+        <el-form-item prop="model" size="small" style="margin-bottom: 8px">
+          <template #label>
+            <span>模型</span>
+            <el-popover :width="480" trigger="hover">
+              <template #reference>
+                <el-icon size="14" class="label-info-icon" style="top: 5px"><InfoFilled /></el-icon>
+              </template>
+              <template #default>
+                <ul class="tip-list">
+                  <li>GPT-3.5-Turbo 针对聊天进行了优化，成本仅为ext-davinci-003的1/10。最大Token限制：4096。</li>
+                  <li style="margin-top: 8px">
+                    GPT-4 能够执行更复杂的任务，并针对聊天进行了优化。最大Token限制：8192。
+                  </li>
+                  <li>GPT-4-32k 与基本gpt-4模式相同的功能，但上下文长度为4倍。最大Token限制：32768。</li>
+                </ul>
+              </template>
+            </el-popover>
+          </template>
+          <el-select v-model="formModelRef.model">
+            <el-option label="GPT-3.5-Turbo" value="gpt-3.5-turbo" />
+            <el-option label="GPT-4" value="gpt-4" />
+            <el-option label="GPT-4-32k" value="gpt-4-32k" />
+          </el-select>
+        </el-form-item>
         <el-form-item prop="isIncludeContext" style="margin-bottom: 0">
           <template #label>
             <span>连续对话</span>
             <el-popover
-              :width="300"
+              :width="480"
               trigger="hover"
-              content="发送消息时将附带之前的对话信息发送，此功能开启有助于获得更智能的回答，但同时也将增大token的开销（最大token数量为4096）。"
+              content="发送消息时将附带之前的对话信息发送，此功能开启有助于获得更智能的回答，但同时也将增大token的开销。"
             >
               <template #reference>
-                <el-icon class="label-info-icon"><InfoFilled /></el-icon>
+                <el-icon size="14" class="label-info-icon"><InfoFilled /></el-icon>
               </template>
             </el-popover>
           </template>
@@ -84,14 +116,14 @@ const handleCloseClick = () => {
         </el-form-item>
         <el-form-item prop="temperature" label="temperature">
           <template #label>
-            <span>temperature</span>
+            <span>温度</span>
             <el-popover
-              :width="300"
+              :width="480"
               trigger="hover"
               content="数值越大获得的回答越分散随机，数值越小获得的回答越集中确定。"
             >
               <template #reference>
-                <el-icon class="label-info-icon"><InfoFilled /></el-icon>
+                <el-icon size="14" class="label-info-icon"><InfoFilled /></el-icon>
               </template>
             </el-popover>
           </template>
@@ -141,6 +173,13 @@ const handleCloseClick = () => {
     position: relative;
     left: 2px;
     top: 9px;
+  }
+}
+.tip-list {
+  li {
+    list-style-type: disc;
+    list-style-position: inside;
+    margin-top: 8px;
   }
 }
 </style>

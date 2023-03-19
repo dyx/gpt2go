@@ -8,7 +8,9 @@ import {
 import { GptModel } from '@/model/commonConstant'
 import { ElMessage } from 'element-plus'
 import { getApiKey } from '@/store'
+import { AxiosError } from 'axios'
 
+const timeout = 90 * 1000
 function getApi() {
   return new OpenAIApi(
     new Configuration({
@@ -49,7 +51,7 @@ export function sendMessage(
 export function sendChatBatchMessageByUser(contents: string[]): Promise<CreateChatCompletionResponse> {
   return new Promise((resolve, reject) => {
     const messages = []
-    for (let content of contents) {
+    for (const content of contents) {
       messages.push({ role: ChatCompletionRequestMessageRoleEnum.User, content })
     }
     sendChatBatchMessage(messages)
@@ -89,48 +91,59 @@ export function send(request: CreateChatCompletionRequest): Promise<CreateChatCo
     }
 
     getApi()
-      .createChatCompletion(request, { timeout: 90 * 1000 })
+      .createChatCompletion(request, { timeout })
       .then(res => resolve(res.data))
       .catch(err => {
-        let errMsg = ''
-        if (err) {
-          if (err.response) {
-            if (err.response.status === 400) {
-              if (err.response.data && err.response.data.error) {
-                if (err.response.data.error.code === 'context_length_exceeded') {
-                  errMsg = '超出此模型的最大上下文长度限制，请适当删减消息或重启（清空）会话。'
-                }
-              }
-            } else if (err.response.status === 401) {
-              errMsg =
-                'API Key不正确，请检查OpenAI配置或生成一个新的，前往 https://platform.openai.com/account/api-keys 查看API Keys。'
-            } else if (err.response.status === 429) {
-              if (err.response.message.indexOf('exceeded') >= 0) {
-                errMsg =
-                  '超出了当前配额，请检查账单明细，前往 https://platform.openai.com/account/billing/overview 查看账单。'
-              } else if (err.response.message.indexOf('overloaded') >= 0) {
-                errMsg = '服务器过载，请稍后再试。'
-              } else {
-                errMsg = '触发限流，请稍后再试。'
-              }
-            } else if (err.response.status === 500) {
-              errMsg = '服务异常，前往 https://status.openai.com/ 查看服务状态。'
-            }
-          } else {
-            if (err.message === 'Network Error' || err.code === 'ECONNABORTED') {
-              errMsg = '网络连接异常，请检查网络。'
-            }
-          }
-        }
-
-        if (errMsg) {
-          ElMessage({
-            message: errMsg,
-            grouping: true,
-            type: 'error'
-          })
-        }
+        showErrMsg(err)
         reject(err)
       })
   })
+}
+
+function showErrMsg(err: AxiosError) {
+  let errMsg = ''
+  if (err) {
+    if (err.response) {
+      if (err.response.status === 400) {
+        if (err.response.data && err.response.data.error) {
+          if (err.response.data.error.code === 'context_length_exceeded') {
+            errMsg = '超出此模型的最大上下文长度限制，请适当删减消息或重启（清空）会话。'
+          }
+        }
+      } else if (err.response.status === 401) {
+        errMsg =
+          'API Key不正确，请检查OpenAI配置或生成一个新的，前往 https://platform.openai.com/account/api-keys 查看API Keys。'
+      } else if (err.response.status === 404) {
+        if (err.response.data?.error?.message === 'That model does not exist') {
+          errMsg = '错误请求，模型不存在。'
+        } else {
+          errMsg = '错误请求，请检查请求相关信息。'
+        }
+      } else if (err.response.status === 429) {
+        const message = (err.response as any).message
+        if (message.indexOf('exceeded') >= 0) {
+          errMsg =
+            '超出了当前配额，请检查账单明细，前往 https://platform.openai.com/account/billing/overview 查看账单。'
+        } else if (message.indexOf('overloaded') >= 0) {
+          errMsg = '服务器过载，请稍后再试。'
+        } else {
+          errMsg = '触发限流，请稍后再试。'
+        }
+      } else if (err.response.status === 500) {
+        errMsg = '服务异常，前往 https://status.openai.com/ 查看服务状态。'
+      }
+    } else {
+      if (err.message === 'Network Error' || err.code === 'ECONNABORTED') {
+        errMsg = '网络连接异常，请检查网络。'
+      }
+    }
+  }
+
+  if (errMsg) {
+    ElMessage({
+      message: errMsg,
+      grouping: true,
+      type: 'error'
+    })
+  }
 }

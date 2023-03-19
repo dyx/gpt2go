@@ -36,22 +36,22 @@ const rulesRef = ref<FormRules>({
   ]
 })
 const resultDataRef = ref([] as NamingNameModel[])
+const systemPrompt =
+  '我想让你充当一个中文取名大师，现在请你帮忙取名字。我将为你提供包括"性别"、"名字长度"、"名字限定查找范围"和"生成名字个数"的输入形式。您的任务是使用这些输入形式，生成3组容易书写，与性别相符，有积极的含义，不要与历史人物重名的名字。不要在您的响应中包含任何解释或附加信息，只输出JSON数组，格式[{"name": "", "relevantWord": "", "meaning": ""}]，格式解释：[name为姓名] [relevantWord为取此名原因] [meaning为寓意]'
 
 const handleGenerateClick = () => {
   formRef.value?.validate((valid: boolean) => {
     if (valid) {
-      let content = '假设你是一个取名大师，现在请你帮忙取名字。'
       const formModel = formModelRef.value
-      const corpusScope = `${formModel.firstNameLength}个字必须从${
-        formModel.corpusScope && formModel.corpusScope.length > 0 ? formModel.corpusScope : '古籍'
-      }中查找，并返回这${formModel.firstNameLength}个字所在段落。`
-      content += `必须满足的条件如下：性别${formModel.gender}，${corpusScope}一共生成3个名字。`
-      content += '另外名字最好书写容易，与性别相符，有积极的含义，尽量不要与历史名人重名。'
-      content += `输出形式只有JSON数组，格式[{"name": "", "source": "", "relevantWord": "", "meaning": ""}]，格式解释：[name为姓名] [source为出处] [relevantWord为相关字所在段落] [meaning为寓意]`
+      const corpusScope = formModel.corpusScope && formModel.corpusScope.length > 0 ? formModel.corpusScope : '不限定'
+      let content = `性别=${formModel.gender} 名字长度=${formModel.firstNameLength} 名字限定查找范围=${corpusScope} 生成名字个数=3`
       requestingRef.value = true
       send({
         model: GptModel.GPT_35_TURBO,
-        messages: [{ role: ChatCompletionRequestMessageRoleEnum.System, content }],
+        messages: [
+          { role: ChatCompletionRequestMessageRoleEnum.System, content: systemPrompt },
+          { role: ChatCompletionRequestMessageRoleEnum.User, content }
+        ],
         temperature: formModel.mode
       })
         .then(res => {
@@ -65,7 +65,7 @@ const handleGenerateClick = () => {
             tokenRef.value = res.usage?.total_tokens as number
           } catch (e) {
             ElMessage({
-              message: '生成名字失败，请重试。',
+              message: '生成名字格式不正确，请重试。',
               grouping: true,
               type: 'error'
             })
@@ -81,11 +81,11 @@ const handleGenerateClick = () => {
 
 <template>
   <div class="naming-name-panel">
-    <div style="width: 30%; float: left">
+    <div class="left-panel">
       <el-card>
         <el-form ref="formRef" :model="formModelRef" :rules="rulesRef" label-width="70px">
           <el-form-item label="姓" prop="lastName">
-            <el-input v-model="formModelRef.lastName" minlength="1" maxlength="2" />
+            <el-input v-model="formModelRef.lastName" minlength="1" maxlength="2" show-word-limit />
           </el-form-item>
           <el-form-item label="名(字数)" prop="firstNameLength">
             <el-radio-group v-model="formModelRef.firstNameLength">
@@ -112,7 +112,7 @@ const handleGenerateClick = () => {
             </el-select>
           </el-form-item>
           <el-form-item>
-            <el-button :loading="requestingRef" type="primary" @click="handleGenerateClick">生成</el-button>
+            <el-button :loading="requestingRef" type="primary" @click="handleGenerateClick"> 生成 </el-button>
             <el-tooltip content="本次消耗token数量" :show-after="1500">
               <el-tag
                 v-show="!requestingRef && tokenRef > 0"
@@ -127,30 +127,24 @@ const handleGenerateClick = () => {
         </el-form>
       </el-card>
     </div>
-    <div style="height: calc(100vh - 56px); width: calc(70% - 16px); float: left; margin-left: 16px">
+    <div class="right-panel">
       <el-scrollbar>
         <div v-show="requestingRef">
           <el-skeleton animated style="width: 100%">
             <template #template>
               <el-row>
-                <el-col :span="8"
-                  ><el-skeleton-item variant="p" style="width: 80%; height: var(--name-skeleton-item-height)"
-                /></el-col>
-                <el-col :span="8"
-                  ><el-skeleton-item variant="p" style="width: 80%; height: var(--name-skeleton-item-height)"
-                /></el-col>
-                <el-col :span="8"
-                  ><el-skeleton-item variant="p" style="width: 80%; height: var(--name-skeleton-item-height)"
-                /></el-col>
+                <el-col :span="8"><el-skeleton-item variant="p" class="skeleton-item-80" /></el-col>
+                <el-col :span="8"><el-skeleton-item variant="p" class="skeleton-item-80" /></el-col>
+                <el-col :span="8"><el-skeleton-item variant="p" class="skeleton-item-80" /></el-col>
               </el-row>
               <el-row style="margin-top: 20px">
                 <el-col>
-                  <el-skeleton-item variant="p" style="width: 50%; height: var(--name-skeleton-item-height)" />
+                  <el-skeleton-item variant="p" class="skeleton-item-50" />
                 </el-col>
               </el-row>
               <el-row style="margin-top: 20px">
                 <el-col>
-                  <el-skeleton-item variant="p" style="width: 50%; height: var(--name-skeleton-item-height)" />
+                  <el-skeleton-item variant="p" class="skeleton-item-50" />
                 </el-col>
               </el-row>
             </template>
@@ -158,24 +152,18 @@ const handleGenerateClick = () => {
           <el-skeleton animated style="width: 100%; margin-top: 48px">
             <template #template>
               <el-row>
-                <el-col :span="8"
-                  ><el-skeleton-item variant="p" style="width: 80%; height: var(--name-skeleton-item-height)"
-                /></el-col>
-                <el-col :span="8"
-                  ><el-skeleton-item variant="p" style="width: 80%; height: var(--name-skeleton-item-height)"
-                /></el-col>
-                <el-col :span="8"
-                  ><el-skeleton-item variant="p" style="width: 80%; height: var(--name-skeleton-item-height)"
-                /></el-col>
+                <el-col :span="8"><el-skeleton-item variant="p" class="skeleton-item-80" /></el-col>
+                <el-col :span="8"><el-skeleton-item variant="p" class="skeleton-item-80" /></el-col>
+                <el-col :span="8"><el-skeleton-item variant="p" class="skeleton-item-80" /></el-col>
               </el-row>
               <el-row style="margin-top: 16px">
                 <el-col>
-                  <el-skeleton-item variant="p" style="width: 50%; height: var(--name-skeleton-item-height)" />
+                  <el-skeleton-item variant="p" class="skeleton-item-50" />
                 </el-col>
               </el-row>
               <el-row style="margin-top: 16px">
                 <el-col>
-                  <el-skeleton-item variant="p" style="width: 50%; height: var(--name-skeleton-item-height)" />
+                  <el-skeleton-item variant="p" class="skeleton-item-50" />
                 </el-col>
               </el-row>
             </template>
@@ -183,24 +171,18 @@ const handleGenerateClick = () => {
           <el-skeleton animated style="width: 100%; margin-top: 48px">
             <template #template>
               <el-row>
-                <el-col :span="8"
-                  ><el-skeleton-item variant="p" style="width: 80%; height: var(--name-skeleton-item-height)"
-                /></el-col>
-                <el-col :span="8"
-                  ><el-skeleton-item variant="p" style="width: 80%; height: var(--name-skeleton-item-height)"
-                /></el-col>
-                <el-col :span="8"
-                  ><el-skeleton-item variant="p" style="width: 80%; height: var(--name-skeleton-item-height)"
-                /></el-col>
+                <el-col :span="8"><el-skeleton-item variant="p" class="skeleton-item-80" /></el-col>
+                <el-col :span="8"><el-skeleton-item variant="p" class="skeleton-item-80" /></el-col>
+                <el-col :span="8"><el-skeleton-item variant="p" class="skeleton-item-80" /></el-col>
               </el-row>
               <el-row style="margin-top: 16px">
                 <el-col>
-                  <el-skeleton-item variant="p" style="width: 50%; height: var(--name-skeleton-item-height)" />
+                  <el-skeleton-item variant="p" class="skeleton-item-50" />
                 </el-col>
               </el-row>
               <el-row style="margin-top: 16px">
                 <el-col>
-                  <el-skeleton-item variant="p" style="width: 50%; height: var(--name-skeleton-item-height)" />
+                  <el-skeleton-item variant="p" class="skeleton-item-50" />
                 </el-col>
               </el-row>
             </template>
@@ -222,7 +204,7 @@ const handleGenerateClick = () => {
             <el-row style="margin-top: 16px">
               <el-col>
                 <span class="result-label">参考</span>
-                <span class="result-value" style="font-size: 18px">{{ item.source + '' + item.relevantWord }}</span>
+                <span class="result-value" style="font-size: 18px">{{ item.relevantWord }}</span>
               </el-col>
             </el-row>
             <el-row style="margin-top: 16px">
@@ -239,17 +221,35 @@ const handleGenerateClick = () => {
   </div>
 </template>
 
-<style scoped>
+<style scoped lang="scss">
 .naming-name-panel {
   --name-skeleton-item-height: 28px;
-}
-.result-label {
-  color: var(--el-color-info);
-  margin-right: 8px;
-  font-size: 14px;
-}
-.result-value {
-  font-weight: bold;
-  font-size: 20px;
+  .left-panel {
+    width: 30%;
+    float: left;
+  }
+  .right-panel {
+    height: calc(100vh - 56px);
+    width: calc(70% - 16px);
+    float: left;
+    margin-left: 16px;
+  }
+  .skeleton-item-50 {
+    width: 80%;
+    height: var(--name-skeleton-item-height);
+  }
+  .skeleton-item-80 {
+    width: 80%;
+    height: var(--name-skeleton-item-height);
+  }
+  .result-label {
+    color: var(--el-color-info);
+    margin-right: 8px;
+    font-size: 14px;
+  }
+  .result-value {
+    font-weight: bold;
+    font-size: 20px;
+  }
 }
 </style>
