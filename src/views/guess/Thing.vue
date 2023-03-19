@@ -283,8 +283,8 @@ init()
             </div>
           </el-scrollbar>
         </div>
-        <div class="operate-panel" @change="handleReplyChange">
-          <el-radio-group v-model="replyRef" style="position: relative; top: -4px">
+        <div class="operate-panel">
+          <el-radio-group v-model="replyRef" style="position: relative; top: -4px" @change="handleReplyChange">
             <el-radio-button label="是">是</el-radio-button>
             <el-radio-button label="不是">不是</el-radio-button>
             <el-radio-button label="自定义">自定义</el-radio-button>

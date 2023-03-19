@@ -23,7 +23,7 @@ onMounted(() => {
   <div v-if="messageModelList && messageModelList.length > 0">
     <div
       v-for="(item, index) in messageModelList"
-      :key="item.id + index"
+      :key="(item.id ? item.id : '') + index"
       class="message-item"
       :style="{
         backgroundColor:

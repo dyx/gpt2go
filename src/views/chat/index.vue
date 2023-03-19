@@ -122,17 +122,19 @@ const handleMessageCopyClick = (content: string) => {
     })
   }
 }
-const handleMessageShareClick = (id: string) => {
-  const list = []
-  for (let i = 0; i < messageModelListRef.value.length; i++) {
-    const item = messageModelListRef.value[i]
-    if (item.id === id) {
-      list.push(item)
-      list.push(messageModelListRef.value[i + 1])
+const handleMessageShareClick = (id: string | undefined) => {
+  if (id) {
+    const list = []
+    for (let i = 0; i < messageModelListRef.value.length; i++) {
+      const item = messageModelListRef.value[i]
+      if (item.id === id) {
+        list.push(item)
+        list.push(messageModelListRef.value[i + 1])
+      }
     }
+    currentShareMessageModelListRef.value = list
+    chatShareVisible.value = true
   }
-  currentShareMessageModelListRef.value = list
-  chatShareVisible.value = true
 }
 const handleClearSessionClick = () => {
   ElMessageBox.confirm('确定要清空会话吗？').then(() => {
