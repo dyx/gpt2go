@@ -4,6 +4,14 @@ import { getChatSetting, setChatSetting } from '@/store'
 const chatSettingModel = getChatSetting()
 if (!chatSettingModel) {
   setChatSetting({ isIncludeContext: false, temperature: 1, model: 'gpt-3.5-turbo' })
+} else {
+  if (!chatSettingModel.model) {
+    setChatSetting({
+      isIncludeContext: chatSettingModel.isIncludeContext,
+      temperature: chatSettingModel.temperature,
+      model: 'gpt-3.5-turbo'
+    })
+  }
 }
 </script>
 
