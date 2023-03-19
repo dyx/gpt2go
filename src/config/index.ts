@@ -3,8 +3,7 @@ export function getMenus() {
     {
       code: '10',
       path: '/homepage/index',
-      // 首页
-      name: 'home',
+      name: '首页',
       icon: 'HomeFilled'
     },
     {
@@ -16,28 +15,19 @@ export function getMenus() {
     {
       code: '30',
       path: '/naming/index',
-      // 起名
-      name: 'name',
+      name: '起名',
       icon: 'MagicStick'
     },
     {
       code: '40',
       path: '/guess/index',
-      // 猜东西
-      name: 'guess',
+      name: '猜东西',
       icon: 'Hide'
     },
-    // {
-    //   code: '50',
-    //   path: '/extract/index',
-    //   name: '提取文本',
-    //   icon: 'Hide'
-    // },
     {
       code: '99',
       path: '/setting/index',
-      // 设置
-      name: 'setting',
+      name: '设置',
       icon: 'Setting'
     }
   ]
