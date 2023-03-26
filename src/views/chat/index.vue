@@ -12,6 +12,7 @@ import ChatSetting from '@/views/chat/ChatSetting.vue'
 import ChatExport from '@/views/chat/ChatExport.vue'
 import ChatShare from '@/views/chat/ChatShare.vue'
 import ChatContent from '@/views/chat/components/ChatContent.vue'
+import i18n from '@/i18n'
 
 const messageBoxRef = ref()
 const messageListScrollBarRef = ref()
@@ -116,7 +117,7 @@ const handleMessageCopyClick = (content: string) => {
   if (content) {
     navigator.clipboard.writeText(content)
     ElMessage({
-      message: '复制成功',
+      message: i18n.global.t('common.copiedTipText'),
       grouping: true,
       type: 'info'
     })
@@ -137,7 +138,7 @@ const handleMessageShareClick = (id: string | undefined) => {
   }
 }
 const handleClearSessionClick = () => {
-  ElMessageBox.confirm('确定要清空会话吗？').then(() => {
+  ElMessageBox.confirm(i18n.global.t('chatGpt.message.clearConfirmText')).then(() => {
     setMessageList([])
     init()
   })
@@ -202,7 +203,7 @@ init()
               <el-popconfirm
                 v-if="item.role === ChatCompletionRequestMessageRoleEnum.User"
                 width="200px"
-                title="确定要删除该对话吗？"
+                :title="$t('chatGpt.message.deleteConfirmText')"
                 @confirm="handleMessageDeleteClick(item.id)"
               >
                 <template #reference>
@@ -225,14 +226,14 @@ init()
       <div class="message-box-info">
         <el-tag type="info" size="small">
           <el-icon size="14" style="position: relative; top: 3px"><Coin /></el-icon>
-          <el-tooltip content="总消耗token数量" :show-after="1500">
+          <el-tooltip :content="$t('chatGpt.message.totalTokenTipText')" :show-after="1500">
             <count-up
               style="display: inline-block; margin-left: 2px"
               :duration="1.5"
               :end-val="totalTokenRef"
             ></count-up>
           </el-tooltip>
-          <el-tooltip content="本次消耗token数量" :show-after="1500">
+          <el-tooltip :content="$t('chatGpt.message.currentTokenTipText')" :show-after="1500">
             <span v-show="currentTokenRef > 0" style="margin-left: 4px; color: var(--el-color-primary)">
               +{{ currentTokenRef }}
             </span>
@@ -257,8 +258,13 @@ init()
       /></el-icon>
       <el-icon v-else size="16" class="message-box-button" @click="handleSendMessageClick"><Promotion /></el-icon>
       <div class="message-box-tip">
-        <span style="margin-right: 8px"><span style="font-weight: bold">enter</span> 发送</span>
-        <span><span style="font-weight: bold">shift+enter</span> 换行</span>
+        <span style="margin-right: 8px"
+          ><span style="font-weight: bold">enter</span> {{ $t('chatGpt.message.sendShortcutKeysTipText ') }}</span
+        >
+        <span
+          ><span style="font-weight: bold">shift+enter</span>
+          {{ $t('chatGpt.message.newLineShortcutKeysTipText') }}</span
+        >
       </div>
     </div>
     <ChatSetting v-model="chatSettingVisible"></ChatSetting>
@@ -273,6 +279,7 @@ init()
   border-radius: 8px;
   padding: 12px 72px 12px 16px;
   font-size: 16px;
+  color: var(--chat-message-box-color);
 }
 :deep(.el-input__count) {
   right: 12px;
@@ -318,13 +325,14 @@ init()
     cursor: pointer;
   }
   .message-item-button:hover {
-    background-color: rgb(236, 236, 241);
+    background-color: var(--chat-message-button-hover-background-color);
     border-radius: 4px;
   }
   .message-box-panel {
     position: relative;
     height: var(--message-box-panel-height);
     padding: 0 var(--message-box-padding);
+    background: var(--chat-message-box-panel-background-color);
   }
   .message-box-info {
     position: absolute;
@@ -338,6 +346,7 @@ init()
     border: 1px solid rgba(0, 0, 0, 0.1);
     border-radius: 8px;
     overflow: hidden;
+    background: var(--chat-message-box-background-color);
   }
   .message-box-button {
     position: absolute;
@@ -348,7 +357,7 @@ init()
     color: rgb(142, 142, 160);
   }
   .message-box-button:hover {
-    background-color: rgb(236, 236, 241);
+    background-color: var(--chat-message-button-hover-background-color);
     border-radius: 4px;
   }
   .message-box-tip {

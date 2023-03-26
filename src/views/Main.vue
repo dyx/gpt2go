@@ -3,6 +3,7 @@ import { ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import BasicMenuItem from '@/components/BasicMenuItem.vue'
 import { getMenus } from '@/config'
+import { useLocaleModeStore } from '@/store/localeModeStore'
 
 const router = useRouter()
 const currentRoutePath = ref(router.currentRoute.value.path)
@@ -16,6 +17,13 @@ watch(
 )
 
 menuDataRef.value = getMenus()
+
+watch(
+  () => useLocaleModeStore().localeMode,
+  () => {
+    menuDataRef.value = getMenus()
+  }
+)
 </script>
 
 <template>

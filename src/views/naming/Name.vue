@@ -3,8 +3,9 @@ import { ref } from 'vue'
 import { ElMessage, FormInstance, FormRules } from 'element-plus'
 import { ChatCompletionRequestMessageRoleEnum } from 'openai/api'
 import { send } from '@/api'
-import { GptModel, NAME_CORPUS_SCOPE } from '@/model/commonConstant'
+import { GptModelEnum, NAME_CORPUS_SCOPE } from '@/model/commonConstant'
 import cnchar from 'cnchar'
+import i18n from '@/i18n'
 
 interface NamingNameModel {
   name: string
@@ -29,7 +30,7 @@ const rulesRef = ref<FormRules>({
   lastName: [
     {
       required: true,
-      message: '请输入一个或两个中文的姓氏',
+      message: i18n.global.t('naming.tab0.setting.lastNameRuleMessage'),
       pattern: /^[\u4e00-\u9fa5]{1,2}$/,
       trigger: 'blur'
     }
@@ -47,7 +48,7 @@ const handleGenerateClick = () => {
       let content = `性别=${formModel.gender} 名字长度=${formModel.firstNameLength} 名字限定查找范围=${corpusScope} 生成名字个数=3`
       requestingRef.value = true
       send({
-        model: GptModel.GPT_35_TURBO,
+        model: GptModelEnum.GPT_35_TURBO,
         messages: [
           { role: ChatCompletionRequestMessageRoleEnum.System, content: systemPrompt },
           { role: ChatCompletionRequestMessageRoleEnum.User, content }
@@ -65,7 +66,7 @@ const handleGenerateClick = () => {
             tokenRef.value = res.usage?.total_tokens as number
           } catch (e) {
             ElMessage({
-              message: '生成名字格式不正确，请重试。',
+              message: i18n.global.t('naming.tab0.errorTipText'),
               grouping: true,
               type: 'error'
             })
@@ -83,20 +84,21 @@ const handleGenerateClick = () => {
   <div class="naming-name-panel">
     <div class="left-panel">
       <el-card>
-        <el-form ref="formRef" :model="formModelRef" :rules="rulesRef" label-width="70px">
-          <el-form-item label="姓" prop="lastName">
+        <el-form ref="formRef" :model="formModelRef" :rules="rulesRef" label-width="100px">
+          <el-form-item :label="$t('naming.tab0.setting.lastName')" prop="lastName">
             <el-input v-model="formModelRef.lastName" minlength="1" maxlength="2" show-word-limit />
           </el-form-item>
-          <el-form-item label="名(字数)" prop="firstNameLength">
+          <el-form-item :label="$t('naming.tab0.setting.firstNameLength')" prop="firstNameLength">
             <el-radio-group v-model="formModelRef.firstNameLength">
-              <el-radio-button :label="1">1个</el-radio-button>
-              <el-radio-button :label="2">2个</el-radio-button>
+              <el-radio-button :label="1">{{ $t('naming.tab0.setting.firstNameLengthValue1') }}</el-radio-button>
+              <el-radio-button :label="2">{{ $t('naming.tab0.setting.firstNameLengthValue2') }}</el-radio-button>
             </el-radio-group>
           </el-form-item>
-          <el-form-item label="性别" prop="gender">
+
+          <el-form-item :label="$t('naming.tab0.setting.gender')" prop="gender">
             <el-radio-group v-model="formModelRef.gender">
-              <el-radio-button label="男">男</el-radio-button>
-              <el-radio-button label="女">女</el-radio-button>
+              <el-radio-button label="男">{{ $t('naming.tab0.setting.genderSelectOption1') }}</el-radio-button>
+              <el-radio-button label="女">{{ $t('naming.tab0.setting.genderSelectOption2') }}</el-radio-button>
             </el-radio-group>
           </el-form-item>
           <!--          <el-form-item label="模式" prop="mode">-->
@@ -106,14 +108,16 @@ const handleGenerateClick = () => {
           <!--              <el-radio-button :label="1.2">有创造力</el-radio-button>-->
           <!--            </el-radio-group>-->
           <!--          </el-form-item>-->
-          <el-form-item label="参考书籍" v-model="formModelRef.corpusScope">
+          <el-form-item :label="$t('naming.tab0.setting.corpusScope')" v-model="formModelRef.corpusScope">
             <el-select multiple v-model="formModelRef.corpusScope" style="width: 100%">
               <el-option v-for="(item, index) in NAME_CORPUS_SCOPE" :key="index" :label="item" :value="item" />
             </el-select>
           </el-form-item>
           <el-form-item>
-            <el-button :loading="requestingRef" type="primary" @click="handleGenerateClick"> 生成 </el-button>
-            <el-tooltip content="本次消耗token数量" :show-after="1500">
+            <el-button :loading="requestingRef" type="primary" @click="handleGenerateClick">
+              {{ $t('naming.tab0.setting.generateButtonText') }}
+            </el-button>
+            <el-tooltip :content="$t('naming.tab0.setting.tokenTipText')" :show-after="1500">
               <el-tag
                 v-show="!requestingRef && tokenRef > 0"
                 size="large"
@@ -192,24 +196,27 @@ const handleGenerateClick = () => {
           <el-card v-for="(item, index) in resultDataRef" :key="'name-card-' + index" style="margin-bottom: 16px">
             <el-row>
               <el-col :span="8">
-                <span class="result-label">姓名</span><span class="result-value">{{ item.name }}</span>
+                <span class="result-label">{{ $t('naming.tab0.generate.nameCol') }}</span
+                ><span class="result-value">{{ item.name }}</span>
               </el-col>
               <el-col :span="8">
-                <span class="result-label">拼音</span><span class="result-value">{{ item.pinyin }}</span>
+                <span class="result-label">{{ $t('naming.tab0.generate.pinyinCol') }}</span
+                ><span class="result-value">{{ item.pinyin }}</span>
               </el-col>
               <el-col :span="8">
-                <span class="result-label">笔画数</span><span class="result-value">{{ item.strokes }}</span>
+                <span class="result-label">{{ $t('naming.tab0.generate.strokesCol') }}</span
+                ><span class="result-value">{{ item.strokes }}</span>
               </el-col>
             </el-row>
             <el-row style="margin-top: 16px">
               <el-col>
-                <span class="result-label">参考</span>
+                <span class="result-label">{{ $t('naming.tab0.generate.relevantWordCol') }}</span>
                 <span class="result-value" style="font-size: 18px">{{ item.relevantWord }}</span>
               </el-col>
             </el-row>
             <el-row style="margin-top: 16px">
               <el-col>
-                <span class="result-label">寓意</span>
+                <span class="result-label">{{ $t('naming.tab0.generate.meaningCol') }}</span>
                 <span class="result-value" style="font-size: 18px">{{ item.meaning }}</span>
               </el-col>
             </el-row>

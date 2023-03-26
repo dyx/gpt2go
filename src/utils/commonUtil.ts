@@ -1,4 +1,7 @@
 import { ChatCompletionRequestMessageRoleEnum } from 'openai/api'
+import { setSetting } from '@/store'
+import { I18nLanguage, ThemeModeEnum } from '@/model/commonConstant'
+import i18n, { DEFAULT_LANG } from '@/i18n'
 
 export function downloadFile(url: string, filename: string) {
   const link = document.createElement('a')
@@ -36,7 +39,6 @@ export function generateCopyButton(codeContent: string) {
   panelElement.append(copiedButtonElement)
 
   copyButtonElement.addEventListener('click', function (e) {
-    console.log('click')
     const copiedButton = (e.target as HTMLDivElement).nextElementSibling as HTMLDivElement
     copiedButton.style.display = ''
     navigator.clipboard.writeText(codeContent)
@@ -45,4 +47,40 @@ export function generateCopyButton(codeContent: string) {
     }, 2500)
   })
   return panelElement
+}
+
+export function changeThemeMode(value: string) {
+  let themeClassName = value === ThemeModeEnum.DARK ? ThemeModeEnum.DARK : ''
+  if (value === ThemeModeEnum.SYSTEM) {
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
+    themeClassName = mediaQuery.matches ? ThemeModeEnum.DARK : ''
+  }
+  const element = document.documentElement
+  element.setAttribute('class', themeClassName)
+  setSetting({ themeMode: value })
+}
+
+export function navigatorLang2i18nLang(value: string) {
+  let locale = DEFAULT_LANG
+  if (value) {
+    value = value.toLowerCase()
+    if (value.indexOf('en') >= 0) {
+      locale = I18nLanguage.ENUS
+    } else if (value.indexOf('zh') >= 0) {
+      if (value === 'zh' || value.indexOf(I18nLanguage.ZHCN) >= 0) {
+        locale = I18nLanguage.ZHCN
+      } else {
+        locale = I18nLanguage.ZHHK
+      }
+    }
+  }
+  return locale
+}
+
+export function isArrayEmpty<T>(arr: T[] | null | undefined): boolean {
+  return !arr || arr.length === 0
+}
+
+export function isObjectEmpty(obj: Record<string, any> | null | undefined): boolean {
+  return !obj || Object.keys(obj).length === 0
 }

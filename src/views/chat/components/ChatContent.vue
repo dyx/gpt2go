@@ -27,7 +27,9 @@ onMounted(() => {
       class="message-item"
       :style="{
         backgroundColor:
-          item.role === ChatCompletionRequestMessageRoleEnum.Assistant ? 'rgb(247,247,248)' : 'rgb(255,255,255)'
+          item.role === ChatCompletionRequestMessageRoleEnum.Assistant
+            ? 'var(--chat-message-assistant-background)'
+            : 'var(--chat-message-user-background)'
       }"
     >
       <div class="message-item-avatar-panel">
@@ -65,9 +67,9 @@ onMounted(() => {
 <style scoped lang="scss">
 .message-item {
   padding: 24px var(--message-box-padding);
-  border-bottom: 1px solid #d9d9e3;
+  border-bottom: 1px solid var(--chat-message-border-color);
   .user {
-    color: rgb(52, 53, 65);
+    color: var(--chat-message-color);
   }
   .message-item-avatar-panel {
     position: relative;

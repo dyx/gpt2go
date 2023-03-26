@@ -2,6 +2,7 @@
 import NavCard from '@/views/homepage/NavCard.vue'
 import { HomepageNavCardItemModel } from '@/model/commonModel'
 import { TableColumnCtx } from 'element-plus'
+import i18n from '@/i18n'
 
 interface HomepageModelModel {
   model: string
@@ -139,7 +140,7 @@ const modelTableData = [
 ]
 const rateLimitTableData = [
   {
-    userType: '免费试用用户',
+    userType: i18n.global.t('homepage.rateLimits.userTypeColValue1'),
     textRpm: 20,
     textTpm: 150000,
     chatRpm: 20,
@@ -150,7 +151,7 @@ const rateLimitTableData = [
     editTpm: 150000
   },
   {
-    userType: '付费用户（前48小时）',
+    userType: i18n.global.t('homepage.rateLimits.userTypeColValue2'),
     textRpm: 60,
     textTpm: 250000,
     chatRpm: 60,
@@ -161,7 +162,7 @@ const rateLimitTableData = [
     editTpm: 150000
   },
   {
-    userType: '付费用户（48小时后）',
+    userType: i18n.global.t('homepage.rateLimits.userTypeColValue3'),
     textRpm: 3500,
     textTpm: 350000,
     chatRpm: 3500,
@@ -234,22 +235,22 @@ const numberFormatter = (row: any, column: any, cellValue: any, index: number) =
       <el-card style="margin-top: 16px">
         <div class="title-panel">
           <div class="indicator"></div>
-          <span class="title">模型</span>
+          <span class="title">{{ $t('homepage.model.title') }}</span>
           <span class="tip">
-            <el-popover :width="400" trigger="hover">
+            <el-popover :width="456" trigger="hover">
               <template #reference>
                 <el-icon size="14"><InfoFilled /></el-icon>
               </template>
               <template #default>
                 <ul class="tip-list">
                   <li>
-                    <span>模型参考：</span>
+                    <span>{{ $t('homepage.model.modelReferenceTipText') }}</span>
                     <el-link target="_blank" href="https://platform.openai.com/docs/models"
                       >https://platform.openai.com/docs/models</el-link
                     >
                   </li>
                   <li>
-                    <span>价格参考：</span>
+                    <span>{{ $t('homepage.model.priceReferenceTipText') }}</span>
                     <el-link target="_blank" href="https://openai.com/pricing">https://openai.com/pricing</el-link>
                   </li>
                 </ul>
@@ -258,36 +259,48 @@ const numberFormatter = (row: any, column: any, cellValue: any, index: number) =
           </span>
         </div>
         <el-table :data="modelTableData" :span-method="handleModelTableSpan">
-          <el-table-column prop="model" label="模型" width="150" />
-          <el-table-column sortable align="center" prop="promptPricing" label="提示价格/1000tokens" width="188">
+          <el-table-column prop="model" :label="$t('homepage.model.modelCol')" width="150" />
+          <el-table-column
+            sortable
+            align="center"
+            prop="promptPricing"
+            :label="$t('homepage.model.promptPricingCol')"
+            width="224"
+          >
             <template #default="scope"> ${{ scope.row.promptPricing }} </template>
           </el-table-column>
-          <el-table-column sortable align="center" prop="completionPricing" label="完成价格/1000tokens" width="188">
+          <el-table-column
+            sortable
+            align="center"
+            prop="completionPricing"
+            :label="$t('homepage.model.completionPricingCol')"
+            width="248"
+          >
             <template #default="scope"> ${{ scope.row.completionPricing }} </template>
           </el-table-column>
-          <el-table-column sortable prop="maxTokens" label="最大Token数" width="144" />
-          <el-table-column prop="trainingData" label="训练数据截止日期" />
+          <el-table-column sortable prop="maxTokens" :label="$t('homepage.model.maxTokensCol')" width="144" />
+          <el-table-column prop="trainingData" :label="$t('homepage.model.trainingDataCol')" />
         </el-table>
       </el-card>
       <el-card style="margin-top: 16px">
         <div class="title-panel">
           <div class="indicator"></div>
-          <span class="title">限流</span>
+          <span class="title">{{ $t('homepage.rateLimits.title') }}</span>
           <span class="tip">
-            <el-popover :width="464" trigger="hover">
+            <el-popover :width="540" trigger="hover">
               <template #reference>
                 <el-icon size="14"><InfoFilled /></el-icon>
               </template>
               <template #default>
-                <span>限流参考：</span>
+                <span>{{ $t('homepage.rateLimits.rateLimitsReference') }}</span>
                 <el-link target="_blank" href="https://platform.openai.com/docs/guides/rate-limits">
                   https://platform.openai.com/docs/guides/rate-limits
                 </el-link>
               </template>
             </el-popover>
           </span>
-          <span class="desc">RPM为每分钟请求数</span>
-          <span class="desc">TPM为每分钟token数</span>
+          <span class="desc">{{ $t('homepage.rateLimits.titleTip1') }}</span>
+          <span class="desc">{{ $t('homepage.rateLimits.titleTip2') }}</span>
         </div>
         <el-row :gutter="8" style="margin-top: 8px">
           <el-col :span="6">
@@ -305,7 +318,7 @@ const numberFormatter = (row: any, column: any, cellValue: any, index: number) =
           </el-col>
           <el-col :span="18">
             <el-table table-layout="auto" :data="rateLimitTableData">
-              <el-table-column prop="userType" label="用户类型" width="168" />
+              <el-table-column prop="userType" :label="$t('homepage.rateLimits.userTypeCol')" width="172" />
               <el-table-column align="center" label="TEXT & EMBEDDING">
                 <el-table-column
                   align="center"

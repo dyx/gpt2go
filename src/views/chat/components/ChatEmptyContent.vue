@@ -28,11 +28,11 @@
               <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
             </svg>
           </div>
-          <div>范例</div>
+          <div>{{ $t('chatGpt.message.empty.example.title') }}</div>
         </div>
-        <div class="data-row">用简单的术语解释量子计算</div>
-        <div class="data-row">对一个10岁的生日有什么创意吗？</div>
-        <div class="data-row">如何在Javascript中发出HTTP请求？</div>
+        <div class="data-row">{{ $t('chatGpt.message.empty.example.text1') }}</div>
+        <div class="data-row">{{ $t('chatGpt.message.empty.example.text2') }}</div>
+        <div class="data-row">{{ $t('chatGpt.message.empty.example.text3') }}</div>
       </el-col>
       <el-col :span="8" class="title-row">
         <div>
@@ -54,11 +54,11 @@
               ></path>
             </svg>
           </div>
-          <div>能力</div>
+          <div>{{ $t('chatGpt.message.empty.capability.title') }}</div>
         </div>
-        <div class="data-row">记住用户在对话中早些时候说的话</div>
-        <div class="data-row">允许用户提供后续更正</div>
-        <div class="data-row">受过拒绝不当请求的训练</div>
+        <div class="data-row">{{ $t('chatGpt.message.empty.capability.text1') }}</div>
+        <div class="data-row">{{ $t('chatGpt.message.empty.capability.text2') }}</div>
+        <div class="data-row">{{ $t('chatGpt.message.empty.capability.text3') }}</div>
       </el-col>
       <el-col :span="8" class="title-row">
         <div>
@@ -79,11 +79,11 @@
               <line x1="12" y1="17" x2="12.01" y2="17"></line>
             </svg>
           </div>
-          <div>限制</div>
+          <div>{{ $t('chatGpt.message.empty.limit.title') }}</div>
         </div>
-        <div class="data-row">可能偶尔会产生不正确的信息</div>
-        <div class="data-row">可能偶尔会产生有害的说明或有偏见的内容</div>
-        <div class="data-row">对2021年后的世界和事件了解有限</div>
+        <div class="data-row">{{ $t('chatGpt.message.empty.limit.text1') }}</div>
+        <div class="data-row">{{ $t('chatGpt.message.empty.limit.text2') }}</div>
+        <div class="data-row">{{ $t('chatGpt.message.empty.limit.text3') }}</div>
       </el-col>
     </el-row>
   </div>

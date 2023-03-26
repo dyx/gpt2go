@@ -1,3 +1,5 @@
+import { I18nLanguage } from '@/model/commonConstant'
+
 export interface MenuItemModel {
   code: string
   name: string
@@ -30,4 +32,9 @@ export interface ChatExportModel {
 export interface HomepageNavCardItemModel {
   label: string
   link: string
+}
+
+export interface SettingModel {
+  themeMode?: string
+  localeMode?: string
 }

@@ -2,13 +2,14 @@
 import { nextTick, onMounted, ref } from 'vue'
 import { ElMessage, ElMessageBox, FormInstance, FormRules, InputInstance } from 'element-plus'
 import { send } from '@/api'
-import { GptModel } from '@/model/commonConstant'
+import { GptModelEnum } from '@/model/commonConstant'
 import { ChatCompletionRequestMessage, ChatCompletionRequestMessageRoleEnum } from 'openai/api'
 import confetti from 'canvas-confetti'
 import { getGuessThingAnswer, getGuessThingMessageList, setGuessThingAnswer, setGuessThingMessageList } from '@/store'
 import { str2ChatCompletionRequestMessageRoleEnum } from '@/utils/commonUtil'
 import { RefreshRight } from '@element-plus/icons-vue'
 import { MessageModel } from '@/model/commonModel'
+import i18n from '@/i18n'
 
 const guessThingListScrollBarRef = ref()
 const guessThingContentElementRef = ref()
@@ -33,7 +34,7 @@ const rulesRef = ref<FormRules>({
   correctAnswer: [
     {
       required: true,
-      message: '请输入15个及以内的字符',
+      message: i18n.global.t('guessThing.setting.answerRuleMessage'),
       trigger: 'blur'
     }
   ]
@@ -90,7 +91,7 @@ const handleStartClick = () => {
       }
       startRequestingRef.value = true
       send({
-        model: GptModel.GPT_35_TURBO,
+        model: GptModelEnum.GPT_35_TURBO,
         messages: [messageParam],
         temperature: formModelRef.value.mode
       })
@@ -138,7 +139,7 @@ const handleSendClick = () => {
   messages.push(messageParam)
   sendRequestingRef.value = true
   send({
-    model: GptModel.GPT_35_TURBO,
+    model: GptModelEnum.GPT_35_TURBO,
     messages,
     temperature: formModelRef.value.mode
   })
@@ -184,7 +185,7 @@ const handleSendClick = () => {
     })
 }
 const handleResumeClick = () => {
-  ElMessageBox.confirm('确定要重新开始吗？')
+  ElMessageBox.confirm(i18n.global.t('guessThing.game.restartTipText'))
     .then(() => {
       formModelRef.value.correctAnswer = ''
       resultDataRef.value = []
@@ -234,17 +235,19 @@ init()
           <!--              <el-radio-button label="我来猜">我来猜</el-radio-button>-->
           <!--            </el-radio-group>-->
           <!--          </el-form-item>-->
-          <el-form-item label="种类" prop="firstNameLength">
+          <el-form-item :label="$t('guessThing.setting.type')" prop="firstNameLength">
             <el-radio-group v-model="formModelRef.category">
-              <el-radio-button label="动物">动物</el-radio-button>
-              <el-radio-button label="植物">植物</el-radio-button>
+              <el-radio-button label="动物">{{ $t('guessThing.setting.typeSelectOption1') }}</el-radio-button>
+              <el-radio-button label="植物">{{ $t('guessThing.setting.typeSelectOption2') }}</el-radio-button>
             </el-radio-group>
           </el-form-item>
-          <el-form-item label="答案" prop="correctAnswer">
+          <el-form-item :label="$t('guessThing.setting.answer')" prop="correctAnswer">
             <el-input maxlength="15" v-model="formModelRef.correctAnswer"></el-input>
           </el-form-item>
           <el-form-item>
-            <el-button :loading="startRequestingRef" type="primary" @click="handleStartClick"> 开始 </el-button>
+            <el-button :loading="startRequestingRef" type="primary" @click="handleStartClick">
+              {{ $t('guessThing.setting.startButtonText') }}
+            </el-button>
           </el-form-item>
         </el-form>
       </el-card>
@@ -254,11 +257,11 @@ init()
       <el-card style="height: calc(100vh - 34px)">
         <el-row class="header-panel">
           <el-col :span="18">
-            <span class="tip-label">答案：</span>
+            <span class="tip-label">{{ $t('guessThing.game.answerTipLabel') }}</span>
             <el-tag round effect="plain">{{ formModelRef.correctAnswer }}</el-tag>
-            <span class="tip-label">回合：</span>
+            <span class="tip-label">{{ $t('guessThing.game.roundTipLabel') }}</span>
             <el-tag round effect="plain">{{ roundRef }}</el-tag>
-            <span class="tip-label">token：</span>
+            <span class="tip-label">token: </span>
             <el-tag round effect="plain">{{ tokenRef }}</el-tag>
             <el-tag round effect="light" style="margin-left: 4px">+{{ latestTokenRef }}</el-tag>
           </el-col>
@@ -285,9 +288,9 @@ init()
         </div>
         <div class="operate-panel">
           <el-radio-group v-model="replyRef" style="position: relative; top: -4px" @change="handleReplyChange">
-            <el-radio-button label="是">是</el-radio-button>
-            <el-radio-button label="不是">不是</el-radio-button>
-            <el-radio-button label="自定义">自定义</el-radio-button>
+            <el-radio-button label="是">{{ $t('guessThing.game.answerSelectOptionYes') }}</el-radio-button>
+            <el-radio-button label="不是">{{ $t('guessThing.game.answerSelectOptionNo') }}</el-radio-button>
+            <el-radio-button label="自定义">{{ $t('guessThing.game.answerSelectOptionCustom') }}</el-radio-button>
           </el-radio-group>
           <el-input
             ref="customReplyInputRef"
@@ -297,7 +300,9 @@ init()
             style="width: 256px; margin-left: 8px; font-size: 12px"
             show-word-limit
           ></el-input>
-          <el-button style="margin-left: 8px" :loading="sendRequestingRef" @click="handleSendClick">发送</el-button>
+          <el-button style="margin-left: 8px" :loading="sendRequestingRef" @click="handleSendClick">{{
+            $t('guessThing.game.sendButtonText')
+          }}</el-button>
         </div>
       </el-card>
     </div>

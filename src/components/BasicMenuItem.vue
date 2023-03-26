@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import BasicMenuItem from './BasicMenuItem.vue'
-import { defineProps } from 'vue'
 import type { MenuItemModel } from '@/model/commonModel'
 
 defineProps<{

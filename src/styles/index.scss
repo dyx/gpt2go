@@ -1,3 +1,5 @@
+@use "element-plus/theme-chalk/src/dark/css-vars.scss" as *;
+
 body,div,dl,dt,dd,ul,ol,li,tr,td,th,
 h1,h2,h3,h4,h5,h6,hr,br,img,table,
 input,form,a,p,pre,textarea{
@@ -7,6 +9,25 @@ input,form,a,p,pre,textarea{
 
 :root {
   --aside-width: 200px;
+  --chat-message-color: rgb(52,53,65);
+  --chat-message-user-background: rgb(255,255,255);
+  --chat-message-assistant-background: rgb(247,247,248);
+  --chat-message-border-color: rgb(217,217,227);
+  --chat-message-box-panel-background-color: rgb(255,255,255);
+  --chat-message-box-color: rgb(0,0,0);
+  --chat-message-box-background-color: rgb(255,255,255);
+  --chat-message-button-hover-background-color: rgb(236, 236, 241);
+}
+
+html.dark {
+  --chat-message-color: rgb(236,236,241);
+  --chat-message-user-background: rgb(52,53,65);
+  --chat-message-assistant-background: rgb(68,70,84);
+  --chat-message-border-color: rgb(32,33,35,.5);
+  --chat-message-box-panel-background-color: rgb(52,53,64);
+  --chat-message-box-color: rgb(255,255,255);
+  --chat-message-box-background-color: rgb(64,65,80);
+  --chat-message-button-hover-background-color: rgba(0, 0, 0, .3);
 }
 
 .card-header {
@@ -25,7 +46,7 @@ input,form,a,p,pre,textarea{
 }
 
 .marked-panel {
-  color: rgb(55,65,81);
+  color: var(--chat-message-color);
   line-height: 24px;
   ol:last-child {
     margin-bottom: 0;
@@ -80,7 +101,7 @@ input,form,a,p,pre,textarea{
       .copy-button {
         border-radius: 4px;
         z-index: 1;
-        background-color: var(--el-text-color-primary);
+        background-color: #303133;
       }
       .copied-button {
         position: absolute;
@@ -90,7 +111,7 @@ input,form,a,p,pre,textarea{
         right: 0;
         border-radius: 4px;
         z-index: 2;
-        background-color: var(--el-text-color-primary);
+        background-color: #303133;
       }
     }
     code {
@@ -117,7 +138,7 @@ input,form,a,p,pre,textarea{
       border-right: 1px solid rgb(217, 217, 217);
       border-bottom: 1px solid rgb(217, 217, 217);
       padding: 4px 8px;
-      color: rgb(17 24 39);
+      color: var(--el-text-color-primary);
       font-weight: 600;
     }
     tbody {

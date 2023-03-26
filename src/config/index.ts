@@ -1,33 +1,35 @@
+import i18n from '@/i18n'
+
 export function getMenus() {
   return [
     {
       code: '10',
       path: '/homepage/index',
-      name: '首页',
+      name: i18n.global.t('menu.10'),
       icon: 'HomeFilled'
     },
     {
       code: '20',
       path: '/chat/index',
-      name: 'ChatGPT',
+      name: i18n.global.t('menu.20'),
       icon: 'ChatLineRound'
     },
     {
       code: '30',
       path: '/naming/index',
-      name: '起名',
+      name: i18n.global.t('menu.30'),
       icon: 'MagicStick'
     },
     {
       code: '40',
       path: '/guess/index',
-      name: '猜东西',
+      name: i18n.global.t('menu.40'),
       icon: 'Hide'
     },
     {
       code: '99',
       path: '/setting/index',
-      name: '设置',
+      name: i18n.global.t('menu.99'),
       icon: 'Setting'
     }
   ]

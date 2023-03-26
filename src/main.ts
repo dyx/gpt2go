@@ -1,12 +1,13 @@
 import { createApp } from 'vue'
 import App from './App.vue'
 import router from './router'
+import { createPinia } from 'pinia'
 import ElementPlus from 'element-plus'
-import zhCn from 'element-plus/es/locale/lang/zh-cn'
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 import 'highlight.js/styles/github-dark.css'
 import './styles/index.scss'
 import hljs from 'highlight.js'
+import i18n from './i18n'
 import { generateCopyButton } from '@/utils/commonUtil'
 
 const app = createApp(App)
@@ -24,9 +25,4 @@ app.directive('marked', function (el) {
   })
 })
 
-app
-  .use(router)
-  .use(ElementPlus, {
-    locale: zhCn
-  })
-  .mount('#app')
+app.use(router).use(createPinia()).use(ElementPlus).use(i18n).mount('#app')

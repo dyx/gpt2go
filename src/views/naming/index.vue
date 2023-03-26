@@ -8,7 +8,7 @@ const tabActiveName = ref(0)
 <template>
   <div class="naming-panel">
     <el-tabs v-model="tabActiveName" style="padding: 0 16px">
-      <el-tab-pane label="人名" :name="0">
+      <el-tab-pane :label="$t('naming.tab0.title')" :name="0">
         <Name></Name>
       </el-tab-pane>
     </el-tabs>

@@ -7,6 +7,7 @@ import { ChatCompletionRequestMessageRoleEnum } from 'openai/api'
 import { FormRules } from 'element-plus'
 import html2canvas from 'html2canvas'
 import { downloadFile } from '@/utils/commonUtil'
+import i18n from '@/i18n'
 
 const props = defineProps<{ modelValue?: boolean; exportElement: any }>()
 const emit = defineEmits(['update:modelValue'])
@@ -23,7 +24,7 @@ const rulesRef = ref<FormRules>({
   filename: [
     {
       required: true,
-      message: '文件名必填',
+      message: i18n.global.t('chatGpt.export.filenameRuleMessage'),
       trigger: 'blur'
     }
   ]
@@ -105,10 +106,10 @@ watch(
       <div class="chat-export-header">
         <div class="left-panel">
           <div class="indicator"></div>
-          <span class="title">导出会话</span>
+          <span class="title">{{ $t('chatGpt.export.title') }}</span>
         </div>
         <div class="right-panel">
-          <el-tooltip content="导出文件" :show-after="1500">
+          <el-tooltip :content="$t('chatGpt.export.exportButtonTipText')" :show-after="1500">
             <el-button
               :loading="loadingRef"
               type="primary"
@@ -118,7 +119,7 @@ watch(
               circle
             ></el-button>
           </el-tooltip>
-          <el-tooltip content="关闭窗口" :show-after="1500">
+          <el-tooltip :content="$t('common.closeDialogTipText')" :show-after="1500">
             <el-button type="primary" @click="handleCloseClick" size="small" :icon="Close" circle></el-button>
           </el-tooltip>
         </div>
@@ -126,11 +127,15 @@ watch(
       </div>
       <el-form ref="formRef" :model="formModelRef" :rules="rulesRef">
         <el-form-item prop="filename">
-          <el-input v-model="formModelRef.filename" placeholder="请输入文件名" style="margin-top: 8px">
+          <el-input
+            v-model="formModelRef.filename"
+            :placeholder="$t('chatGpt.export.filenamePlaceholder')"
+            style="margin-top: 8px"
+          >
             <template #prepend>
               <el-select v-model="formModelRef.fileFormat" placeholder="Select" style="width: 120px">
                 <el-option label="Markdown" value=".md" />
-                <el-option label="图片" value=".png" />
+                <el-option :label="$t('chatGpt.export.imageTypeLabel')" value=".png" />
               </el-select>
             </template>
             <template #append>

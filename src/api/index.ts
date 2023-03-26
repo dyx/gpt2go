@@ -5,10 +5,11 @@ import {
   CreateChatCompletionRequest,
   CreateChatCompletionResponse
 } from 'openai/api'
-import { GptModel } from '@/model/commonConstant'
+import { GptModelEnum } from '@/model/commonConstant'
 import { ElMessage } from 'element-plus'
 import { getApiKey } from '@/store'
 import { AxiosError } from 'axios'
+import i18n from '@/i18n'
 
 const timeout = 90 * 1000
 function getApi() {
@@ -31,13 +32,13 @@ export function sendChatMessage(
   content: string
 ): Promise<CreateChatCompletionResponse> {
   return new Promise((resolve, reject) => {
-    sendMessage(GptModel.GPT_35_TURBO, role, content)
+    sendMessage(GptModelEnum.GPT_35_TURBO, role, content)
       .then(res => resolve(res))
       .catch(err => reject(err))
   })
 }
 export function sendMessage(
-  model: GptModel,
+  model: GptModelEnum,
   role: ChatCompletionRequestMessageRoleEnum,
   content: string
 ): Promise<CreateChatCompletionResponse> {
@@ -63,13 +64,13 @@ export function sendChatBatchMessage(
   messages: Array<ChatCompletionRequestMessage>
 ): Promise<CreateChatCompletionResponse> {
   return new Promise((resolve, reject) => {
-    sendBatchMessage(GptModel.GPT_35_TURBO, messages)
+    sendBatchMessage(GptModelEnum.GPT_35_TURBO, messages)
       .then(res => resolve(res))
       .catch(err => reject(err))
   })
 }
 export function sendBatchMessage(
-  model: GptModel,
+  model: GptModelEnum,
   messages: Array<ChatCompletionRequestMessage>
 ): Promise<CreateChatCompletionResponse> {
   return new Promise((resolve, reject) => {
@@ -82,7 +83,7 @@ export function send(request: CreateChatCompletionRequest): Promise<CreateChatCo
   return new Promise((resolve, reject) => {
     if (!getApiKey()) {
       ElMessage({
-        message: '使用前，请先前往设置页面配置API Key',
+        message: i18n.global.t('api.emptyApiKeyError'),
         grouping: true,
         type: 'error'
       })
@@ -107,34 +108,32 @@ function showErrMsg(err: AxiosError) {
       if (err.response.status === 400) {
         if (err.response.data && err.response.data.error) {
           if (err.response.data.error.code === 'context_length_exceeded') {
-            errMsg = '超出此模型的最大上下文长度限制，请适当删减消息或重启（清空）会话。'
+            errMsg = i18n.global.t('api.contextLengthExceededError')
           }
         }
       } else if (err.response.status === 401) {
-        errMsg =
-          'API Key不正确，请检查OpenAI配置或生成一个新的，前往 https://platform.openai.com/account/api-keys 查看API Keys。'
+        errMsg = i18n.global.t('api.incorrectApiKeyError')
       } else if (err.response.status === 404) {
         if (err.response.data?.error?.message === 'That model does not exist') {
-          errMsg = '错误请求，模型不存在。'
+          errMsg = i18n.global.t('api.modelNotExistError')
         } else {
-          errMsg = '错误请求，请检查请求相关信息。'
+          errMsg = i18n.global.t('api.requestError')
         }
       } else if (err.response.status === 429) {
         const message = (err.response as any).message
         if (message.indexOf('exceeded') >= 0) {
-          errMsg =
-            '超出了当前配额，请检查账单明细，前往 https://platform.openai.com/account/billing/overview 查看账单。'
+          errMsg = i18n.global.t('api.exceededQuotaError')
         } else if (message.indexOf('overloaded') >= 0) {
-          errMsg = '服务器过载，请稍后再试。'
+          errMsg = i18n.global.t('api.serverOverloadedError')
         } else {
-          errMsg = '触发限流，请稍后再试。'
+          errMsg = i18n.global.t('api.rateLimitsError')
         }
       } else if (err.response.status === 500) {
-        errMsg = '服务异常，前往 https://status.openai.com/ 查看服务状态。'
+        errMsg = i18n.global.t('api.serverError')
       }
     } else {
       if (err.message === 'Network Error' || err.code === 'ECONNABORTED') {
-        errMsg = '网络连接异常，请检查网络。'
+        errMsg = i18n.global.t('api.connectionAbortedError')
       }
     }
   }

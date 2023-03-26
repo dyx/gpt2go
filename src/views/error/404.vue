@@ -16,12 +16,12 @@ const handleReturnHomeClick = () => {
     </el-row>
     <el-row>
       <el-col style="text-align: center; margin-top: 16px">
-        <span class="not-found-word">未找到页面</span>
+        <span class="not-found-word">{{ $t('notFound.notFoundWord') }}</span>
       </el-col>
     </el-row>
     <el-row>
       <el-col style="text-align: center; margin-top: 16px">
-        <el-button type="primary" @click="handleReturnHomeClick">返回首页</el-button>
+        <el-button type="primary" @click="handleReturnHomeClick">{{ $t('notFound.returnHomeButtonText') }}</el-button>
       </el-col>
     </el-row>
   </div>
