@@ -259,7 +259,7 @@ init()
       <el-icon v-else size="16" class="message-box-button" @click="handleSendMessageClick"><Promotion /></el-icon>
       <div class="message-box-tip">
         <span style="margin-right: 8px"
-          ><span style="font-weight: bold">enter</span> {{ $t('chatGpt.message.sendShortcutKeysTipText ') }}</span
+          ><span style="font-weight: bold">enter</span> {{ $t('chatGpt.message.sendShortcutKeysTipText') }}</span
         >
         <span
           ><span style="font-weight: bold">shift+enter</span>
